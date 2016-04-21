@@ -6,6 +6,9 @@
     .grid {
       position: relative;
       border: 1px solid black;
+      width: 640px;
+      height: 640px;
+      margin: auto;
     }
 
     .row {
@@ -146,7 +149,15 @@
     var grid = $('#js-grid');
     game.initialize(grid);
 
+    var lastPressed = 0;
     $(document).on("keydown", function (e) {
+      let now = new Date().getTime();
+      if ((now - lastPressed) < 350) {
+        e.preventDefault();
+        return;
+      }
+
+      lastPressed = now;
       switch(e.which) {
         case 37: // left
         game.player.moveLeft();
