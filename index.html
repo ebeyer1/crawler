@@ -1,0 +1,172 @@
+<html>
+<head>
+  <title>Crawler</title>
+
+  <style>
+    .grid {
+      position: relative;
+      border: 1px solid black;
+    }
+
+    .row {
+      height: 10%;
+    }
+
+    .column {
+      display: inline-block;
+      width: calc(10% - 2px);
+      height: 100%;
+      border: 1px solid black;
+    }
+
+    .player {
+      position: absolute;
+      height: calc(10% - 1px);
+      width: calc(10% - 2px);
+      background-color: red;
+      margin-left: 1px;
+      margin-top: 1px;
+      border-radius: 15px;
+
+      transition: top .35s ease-in, left .35s ease-in;
+    }
+  </style>
+</head>
+<body>
+  <div id="js-grid" class="grid">
+    <div id="js-player" class="player"></div>
+  </div>
+</body>
+
+<script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    const MAX_WIDTH = 10;
+    const MAX_HEIGHT = 10;
+
+    class Map {
+      constructor(width, height) {
+        this.width = width;
+        this.height = height;
+        this.grid = [];
+      }
+
+      generate() {
+        for (let i = 0; i < this.height; i++) {
+          let row = [];
+          for (let j = 0; j < this.width; j++) {
+            row.push(j);
+          }
+          this.grid.push(row);
+        }
+      }
+    }
+
+    class Player {
+      constructor() {
+        this.position = new Vector(0, 0);
+        this.playerElement = $('#js-player')[0];
+      }
+
+      moveUp(change) {
+        change = change || -1;
+        this.move(0, change);
+      }
+
+      moveRight(change) {
+        change = change || 1;
+        this.move(change, 0);
+      }
+
+      moveDown(change) {
+        change = change || 1;
+        this.move(0, change);
+      }
+
+      moveLeft(change) {
+        change = change || -1;
+        this.move(change, 0);
+      }
+
+      move(dx, dy) {
+        let newX = this.position.x + dx;
+        let newY = this.position.y + dy;
+
+        if (newX < 0 || newX > MAX_WIDTH - 1 ||
+            newY < 0 || newY > MAX_HEIGHT - 1) {
+          return;
+        }
+
+        this.position = new Vector(newX, newY);
+        this.updatePosition();
+      }
+
+      updatePosition() {
+        this.playerElement.style.top = this.position.y * 10 + '%';
+        this.playerElement.style.left =  this.position.x * 10 + '%';
+      }
+    }
+
+    class Vector {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+      }
+    }
+
+    class Game {
+      constructor() {
+        this.player = new Player();
+        this.map = new Map(MAX_WIDTH, MAX_HEIGHT);
+      }
+
+      start() {
+        this.map.generate();
+      }
+
+      initialize(element) {
+        for(let i = 0; i < this.map.grid.length; i++) {
+          let row = document.createElement("div");
+          row.className = "row";
+          for (let j = 0; j < this.map.grid[i].length; j++) {
+            let col = document.createElement("div");
+            col.className = "column";
+            row.appendChild(col);
+          }
+          element.append(row);
+        }
+        this.player.updatePosition();
+      }
+    }
+
+    // start game
+    let game = new Game();
+    game.start();
+
+    // initialize
+    var grid = $('#js-grid');
+    game.initialize(grid);
+
+    $(document).on("keydown", function (e) {
+      switch(e.which) {
+        case 37: // left
+        game.player.moveLeft();
+        break;
+
+        case 38: // up
+        game.player.moveUp();
+        break;
+
+        case 39: // right
+        game.player.moveRight();
+        break;
+
+        case 40: // down
+        game.player.moveDown();
+        break;
+
+        default: return; // exit
+      }
+      e.preventDefault(); // prevent default action (scrolling / move caret)
+    });
+</script>
+</html>
